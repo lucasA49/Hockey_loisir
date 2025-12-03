@@ -3,10 +3,10 @@ import { NavLink } from 'react-router-dom'; // <--- Import indispensable
 
 const MatchDashboard = () => {
   return (
-    <div className="max-w-5xl mx-auto px-4 relative z-20">
+    <div className="max-w-5xl mx-auto px-4 relative z-10">
       
       {/* CONTAINER BLANC (-mt-24 pour chevaucher) */}
-      <div className="-mt-24 bg-white rounded-3xl shadow-2xl p-6 md:p-10 mb-20 border border-gray-100">
+      <div className="-mt-24 bg-white rounded-3xl shadow-2xl p-6 md:p-10 mb-10 border border-gray-100">
         
         {/* --- PARTIE 1 : PROCHAIN MATCH --- */}
         <div className="text-center mb-12">
