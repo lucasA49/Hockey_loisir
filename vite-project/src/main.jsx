@@ -6,6 +6,9 @@ import "./App.css";
 // Pages
 import Home from "./Pages/Home.jsx";
 import Login from "./Pages/Login.jsx";
+import Resultat from "./Pages/Resultat.jsx";
+import Calendar from "./Pages/Calendar.jsx";
+
 
 const router = createBrowserRouter([
   {
@@ -18,11 +21,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/calendrier",
-    element: <Home />,
+    element: <Calendar />,
   },
   {
     path: "/resultats",
-    element: <Home />,
+    element: <Resultat />,
   },
   {
     path: "/",
