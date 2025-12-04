@@ -1,69 +1,126 @@
-import React, { useState } from 'react';
+// src/Pages/Login.jsx
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-// Composant du formulaire de Connexion
-export default function LoginForm() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+const API_URL = "http://localhost:4000/api/auth/login";
 
-  // Fonction qui sera appelée à la soumission
-  const handleSubmit = (e) => {
+export default function Login() {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Les données prêtes à être envoyées à votre API (backend/base de données)
-    const formData = {
-      username: username,
-      password: password,
-    };
+    setError("");
+    setSuccessMsg("");
 
-    console.log('Données à envoyer à la base de données (API) :', formData);
+    if (!formData.email || !formData.password) {
+      setError("Merci de remplir l’email et le mot de passe.");
+      return;
+    }
 
-    // --- LOGIQUE D'ENVOI À L'API À IMPLÉMENTER ICI ---
-    // Exemple : 
-    // fetch('/api/login', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(formData),
-    // }).then(...)
-    // --------------------------------------------------
+    try {
+      setLoading(true);
+
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Identifiants invalides.");
+        return;
+      }
+
+      // Connexion OK → on peut stocker l'admin dans le localStorage
+      localStorage.setItem("dogz_admin", JSON.stringify(data.admin));
+      setSuccessMsg("Connexion réussie, redirection…");
+
+      // Redirection vers le dashboard admin
+      setTimeout(() => {
+        navigate("/admindashboard");
+      }, 800);
+    } catch (err) {
+      console.error(err);
+      setError("Erreur de connexion au serveur.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    // Conteneur centré (pour la démo)
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      
-      {/* Carte du Formulaire (Design simple Tailwind) */}
-      <div className="w-full max-w-sm bg-white p-8 rounded-xl shadow-2xl border border-gray-200">
-        <h2 className="text-3xl font-bold text-gray-800 text-center mb-8">
-          Connexion Admin
-        </h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          
-          {/* Champ Pseudo/Nom d'utilisateur */}
-          <div>
-            <label 
-              htmlFor="username" 
-              className="block text-sm font-medium text-gray-700 mb-1"
+    <div className="min-h-screen bg-slate-900 text-slate-100 flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-slate-950/80 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl shadow-black/40">
+        <div className="mb-5 text-center">
+          <p className="text-[11px] uppercase tracking-wide text-red-400 mb-1">
+            DOGZ CHOLET – Panel Admin
+          </p>
+          <h1 className="text-xl md:text-2xl font-bold">Connexion admin</h1>
+          <p className="text-xs md:text-sm text-slate-400 mt-1">
+            Accès réservé aux membres du staff.
+          </p>
+        </div>
+
+        {error && (
+          <div className="mb-3 text-xs md:text-sm text-red-300 bg-red-950/40 border border-red-700/60 rounded-lg px-3 py-2">
+            {error}
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="mb-3 text-xs md:text-sm text-emerald-300 bg-emerald-950/40 border border-emerald-700/60 rounded-lg px-3 py-2">
+            {successMsg}
+          </div>
+        )}
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          {/* Email */}
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="email"
+              className="text-xs md:text-sm text-slate-300"
             >
-              Pseudo
+              Email admin
             </label>
             <input
-              id="username"
-              name="username"
-              type="text"
-              required
-              placeholder="Nom d'utilisateur Admin"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150"
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500"
+              placeholder="admin@dogz.local"
             />
           </div>
-          
-          {/* Champ Mot de passe */}
-          <div>
-            <label 
-              htmlFor="password" 
-              className="block text-sm font-medium text-gray-700 mb-1"
+
+          {/* Password */}
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="password"
+              className="text-xs md:text-sm text-slate-300"
             >
               Mot de passe
             </label>
@@ -71,25 +128,27 @@ export default function LoginForm() {
               id="password"
               name="password"
               type="password"
-              required
-              placeholder="●●●●●●●●"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150"
+              autoComplete="current-password"
+              value={formData.password}
+              onChange={handleChange}
+              className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-red-500"
+              placeholder="••••••••••"
             />
           </div>
-          
-          {/* Bouton de Soumission */}
-          <div className="pt-4">
-            <button
-              type="submit"
-              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-md text-base font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150"
-            >
-              Se connecter
-            </button>
-          </div>
+
+          {/* Bouton */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full mt-2 bg-red-600 hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed text-sm md:text-base font-semibold rounded-lg py-2.5 transition"
+          >
+            {loading ? "Connexion..." : "Se connecter"}
+          </button>
         </form>
 
+        <p className="text-[11px] text-slate-500 mt-4 text-center">
+          Besoin d’un accès ? Contactez le responsable de l’équipe.
+        </p>
       </div>
     </div>
   );

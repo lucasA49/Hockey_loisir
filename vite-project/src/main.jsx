@@ -3,14 +3,25 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./App.css";
 
-// Pages
+// Pages publiques
 import Home from "./Pages/Home.jsx";
 import Login from "./Pages/Login.jsx";
 import Resultat from "./Pages/Resultat.jsx";
 import Calendar from "./Pages/Calendar.jsx";
 
+// Pages admin
+import AdminPanel from "./Pages/AdminPanel.jsx";
+import AdminLicencies from "./Admin/AdminLicencies.jsx";
+import AdminResultats from "./Admin/AdminResultas.jsx";
+import AdminCalendrier from "./Admin/AdminCalendrier.jsx";
+
+// Protection admin
+import RequireAdmin from "./Composants/RequireAdmin.jsx";
 
 const router = createBrowserRouter([
+  // -------------------------
+  // PAGES PUBLIQUES
+  // -------------------------
   {
     path: "/",
     element: <Home />,
@@ -27,9 +38,41 @@ const router = createBrowserRouter([
     path: "/resultats",
     element: <Resultat />,
   },
+
+  // -------------------------
+  // PAGES ADMIN (PROTÉGÉES)
+  // -------------------------
   {
-    path: "/",
-    element: <Home />,
+    path: "/admindashboard",
+    element: (
+      <RequireAdmin>
+        <AdminPanel />
+      </RequireAdmin>
+    ),
+  },
+  {
+    path: "/admin/licencies",
+    element: (
+      <RequireAdmin>
+        <AdminLicencies />
+      </RequireAdmin>
+    ),
+  },
+  {
+    path: "/admin/resultats",
+    element: (
+      <RequireAdmin>
+        <AdminResultats />
+      </RequireAdmin>
+    ),
+  },
+  {
+    path: "/admin/calendrier",
+    element: (
+      <RequireAdmin>
+        <AdminCalendrier />
+      </RequireAdmin>
+    ),
   },
 ]);
 
