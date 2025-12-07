@@ -16,42 +16,7 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Navigation footer */}
-          <nav className="flex flex-wrap items-center gap-3 text-xs md:text-[13px]">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `px-2 py-1 rounded-full transition ${
-                  isActive
-                    ? "bg-red-600 text-white"
-                    : "hover:bg-slate-800 hover:text-white"
-                }`
-              }
-            >
-              Accueil
-            </NavLink>
-
-            <NavLink
-              to="/matchs"
-              className="px-2 py-1 rounded-full hover:bg-slate-800 hover:text-white transition"
-            >
-              Matchs
-            </NavLink>
-
-            <NavLink
-              to="/resultats"
-              className="px-2 py-1 rounded-full hover:bg-slate-800 hover:text-white transition"
-            >
-              Résultats
-            </NavLink>
-
-            <NavLink
-              to="/calendrier"
-              className="px-2 py-1 rounded-full hover:bg-slate-800 hover:text-white transition"
-            >
-              Calendrier
-            </NavLink>
-          </nav>
+       
         </div>
 
         {/* Bas du footer */}

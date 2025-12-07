@@ -14,6 +14,9 @@ export default function AdminLicencies() {
     nom: "",
     dateNaissance: "",
     licence: "",
+    poste: "",
+    telephone: "",
+    statut: "Actif",
   });
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -39,12 +42,29 @@ export default function AdminLicencies() {
     fetchLicencies();
   }, []);
 
+  const resetForm = () => {
+    setFormData({
+      prenom: "",
+      nom: "",
+      dateNaissance: "",
+      licence: "",
+      poste: "",
+      telephone: "",
+      statut: "Actif",
+    });
+    setEditingId(null);
+    setError("");
+    setMessage("");
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+    setError("");
+    setMessage("");
   };
 
   // 🔹 Ajouter / Modifier un licencié (backend)
@@ -59,7 +79,7 @@ export default function AdminLicencies() {
       !formData.dateNaissance ||
       !formData.licence
     ) {
-      setError("Merci de remplir tous les champs.");
+      setError("Merci de remplir tous les champs obligatoires.");
       return;
     }
 
@@ -70,6 +90,9 @@ export default function AdminLicencies() {
         nom: formData.nom,
         dateNaissance: formData.dateNaissance,
         licence: formData.licence,
+        poste: formData.poste || null,
+        telephone: formData.telephone || null,
+        statut: formData.statut || "Actif",
       };
 
       if (editingId) {
@@ -107,14 +130,7 @@ export default function AdminLicencies() {
         setMessage("Licencié ajouté.");
       }
 
-      // Reset
-      setFormData({
-        prenom: "",
-        nom: "",
-        dateNaissance: "",
-        licence: "",
-      });
-      setEditingId(null);
+      resetForm();
     } catch (err) {
       console.error(err);
       setError("Erreur de communication avec le serveur.");
@@ -128,6 +144,9 @@ export default function AdminLicencies() {
       nom: licencie.nom || "",
       dateNaissance: licencie.dateNaissance || "",
       licence: licencie.licence || "",
+      poste: licencie.poste || "",
+      telephone: licencie.telephone || "",
+      statut: licencie.statut || "Actif",
     });
     setError("");
     setMessage("");
@@ -169,7 +188,7 @@ export default function AdminLicencies() {
             Navigation admin
           </p>
 
-          <div className="grid grid-cols-3 gap-2 md:flex md:flex-row md:gap-3">
+          <div className="grid grid-cols-4 gap-2 md:flex md:flex-row md:gap-3">
             {/* LICENCIÉS */}
             <NavLink
               to="/admin/licencies"
@@ -313,6 +332,53 @@ export default function AdminLicencies() {
               />
             </div>
 
+            <div className="flex flex-col gap-1">
+              <label className="text-slate-400" htmlFor="poste">
+                Poste
+              </label>
+              <input
+                id="poste"
+                name="poste"
+                type="text"
+                value={formData.poste}
+                onChange={handleChange}
+                placeholder="Gardien, Défenseur, Attaquant..."
+                className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-slate-400" htmlFor="telephone">
+                Téléphone
+              </label>
+              <input
+                id="telephone"
+                name="telephone"
+                type="tel"
+                value={formData.telephone}
+                onChange={handleChange}
+                placeholder="06..."
+                className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-slate-400" htmlFor="statut">
+                Statut
+              </label>
+              <select
+                id="statut"
+                name="statut"
+                value={formData.statut}
+                onChange={handleChange}
+                className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500"
+              >
+                <option value="Actif">Actif</option>
+                <option value="Blessé">Blessé</option>
+                <option value="Repos">Repos</option>
+              </select>
+            </div>
+
             <div className="flex gap-2">
               <button
                 type="submit"
@@ -324,15 +390,7 @@ export default function AdminLicencies() {
               {editingId && (
                 <button
                   type="button"
-                  onClick={() => {
-                    setEditingId(null);
-                    setFormData({
-                      prenom: "",
-                      nom: "",
-                      dateNaissance: "",
-                      licence: "",
-                    });
-                  }}
+                  onClick={resetForm}
                   className="flex-1 bg-slate-700 hover:bg-slate-600 text-xs md:text-sm font-semibold rounded-lg py-2 transition"
                 >
                   Annuler
@@ -363,6 +421,9 @@ export default function AdminLicencies() {
                   <th className="py-2 pr-4">Nom</th>
                   <th className="py-2 pr-4">Date de naissance</th>
                   <th className="py-2 pr-4">N° licence</th>
+                  <th className="py-2 pr-4">Poste</th>
+                  <th className="py-2 pr-4">Téléphone</th>
+                  <th className="py-2 pr-4">Statut</th>
                   <th className="py-2">Actions</th>
                 </tr>
               </thead>
@@ -381,6 +442,25 @@ export default function AdminLicencies() {
                     </td>
                     <td className="py-2 pr-4 whitespace-nowrap">
                       {lic.licence}
+                    </td>
+                    <td className="py-2 pr-4 whitespace-nowrap">
+                      {lic.poste || "-"}
+                    </td>
+                    <td className="py-2 pr-4 whitespace-nowrap">
+                      {lic.telephone || "-"}
+                    </td>
+                    <td className="py-2 pr-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold ${
+                          lic.statut === "Actif"
+                            ? "bg-emerald-500/15 text-emerald-300"
+                            : lic.statut === "Blessé"
+                            ? "bg-red-500/15 text-red-300"
+                            : "bg-amber-500/15 text-amber-300"
+                        }`}
+                      >
+                        {lic.statut || "Actif"}
+                      </span>
                     </td>
                     <td className="py-2">
                       <div className="flex flex-wrap gap-2">
@@ -406,7 +486,7 @@ export default function AdminLicencies() {
                 {licencies.length === 0 && !loading && (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={8}
                       className="py-4 text-center text-[11px] text-slate-500"
                     >
                       Aucun licencié pour le moment.
