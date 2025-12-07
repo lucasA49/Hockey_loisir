@@ -2,7 +2,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:4000/api/auth/login";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:4000";
+
+const API_URL = `${API_BASE_URL}/api/auth/login`;
 
 export default function Login() {
   const navigate = useNavigate();

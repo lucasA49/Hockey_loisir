@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 
-const API_MATCHS = "http://localhost:4000/api/matchs";
-const API_EVENTS = "http://localhost:4000/api/evenements";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API_MATCHS = `${API_BASE_URL}/api/matchs`;
+const API_EVENTS = `${API_BASE_URL}/api/evenements`;
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "";

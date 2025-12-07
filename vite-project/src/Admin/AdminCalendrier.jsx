@@ -2,7 +2,12 @@ import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Users, Trophy, CalendarDays } from "lucide-react";
 
-const API_URL = "http://localhost:4000/api/evenements";
+// ✅ Base URL commune (vient du .env Vite)
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:4000";
+
+// ✅ Endpoint pour les événements
+const API_URL = `${API_BASE_URL}/api/evenements`;
 
 export default function AdminCalendrier() {
   const navBase =

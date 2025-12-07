@@ -2,8 +2,12 @@ import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { Users, Trophy, CalendarDays } from "lucide-react";
 
-const API_URL = "http://localhost:4000/api/licencies";
+// ✅ Base URL de l’API (vient du .env Vite)
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:4000";
 
+// ✅ Endpoint pour les licenciés
+const API_URL = `${API_BASE_URL}/api/licencies`;
 export default function AdminDashboard() {
   const navigate = useNavigate();
 

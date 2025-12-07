@@ -2,7 +2,12 @@ import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { Users, Trophy, CalendarDays } from "lucide-react";
 
-const API_URL = "http://localhost:4000/api/matchs";
+// URL de base de l'API (local ou Render)
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:4000";
+
+// URL finale pour les matchs
+const API_URL = `${API_BASE_URL}/api/matchs`;
 
 export default function AdminResultats() {
   const navBase =

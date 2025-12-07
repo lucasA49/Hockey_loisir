@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 
-const API_URL = "http://localhost:4000/api/matchs";
+// ✅ Base URL de l'API (configurée via .env Vite)
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:4000";
+
+// ✅ Endpoint pour les matchs
+const API_URL = `${API_BASE_URL}/api/matchs`;
 
 export default function Resultat() {
   const [matchs, setMatchs] = useState([]);
