@@ -1,8 +1,9 @@
 // server/db.js
 const Database = require("better-sqlite3");
+const path = require("path");
 
-// Crée (ou ouvre) le fichier dogz.db
-const db = new Database("dogz.db");
+// Crée (ou ouvre) le fichier dogz.db à côté de ce fichier
+const db = new Database(path.join(__dirname, "dogz.db"));
 
 // On crée toutes les tables nécessaires si elles n'existent pas
 db.exec(`

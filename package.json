@@ -1,5 +1,10 @@
 {
-  "dependencies": {
-    "lucide-react": "^0.555.0"
+  "name": "dogz-hockey-loisir",
+  "version": "1.0.0",
+  "scripts": {
+    "install": "npm install --prefix vite-project && npm install --prefix vite-project/server",
+    "build": "npm run build --prefix vite-project",
+    "start": "node vite-project/server/index.js",
+    "seed": "node vite-project/server/seedAdmin.js"
   }
 }

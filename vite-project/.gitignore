@@ -15,7 +15,6 @@ dist-ssr
 # Variables d'environnement (ne jamais commiter)
 .env
 .env.local
-.env.production
 server/.env
 server/dogz.db
 
