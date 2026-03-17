@@ -1,10 +1,18 @@
 {
   "name": "dogz-hockey-loisir",
   "version": "1.0.0",
+  "main": "vite-project/server/index.js",
   "scripts": {
-    "install": "npm install --prefix vite-project && npm install --prefix vite-project/server",
-    "build": "npm run build --prefix vite-project",
+    "build": "npm install --prefix vite-project && npm run build --prefix vite-project && npm install --prefix vite-project/server",
     "start": "node vite-project/server/index.js",
     "seed": "node vite-project/server/seedAdmin.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.5.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3"
   }
 }
