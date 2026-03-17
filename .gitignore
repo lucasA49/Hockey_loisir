@@ -1,5 +1,7 @@
 node_modules/
 .env
+*.env
+production.env
 .env.local
 *.local
 .DS_Store
