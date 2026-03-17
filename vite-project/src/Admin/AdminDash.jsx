@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { Users, Trophy, CalendarDays } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import AdminNav from "./AdminNav";
+import { authFetch } from "../utils/authFetch";
 
-// ✅ Base URL de l’API (vient du .env Vite)
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_LICENCIES = `${API_BASE_URL}/api/licencies`;
+const API_MATCHS = `${API_BASE_URL}/api/matchs`;
+const API_EVENEMENTS = `${API_BASE_URL}/api/evenements`;
 
-// ✅ Endpoint pour les licenciés
-const API_URL = `${API_BASE_URL}/api/licencies`;
 export default function AdminDashboard() {
   const navigate = useNavigate();
 
@@ -15,40 +15,112 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const navBase =
-    "flex items-center justify-center md:justify-start gap-2 px-3 md:px-4 py-2 rounded-xl text-[11px] md:text-sm font-medium transition border";
+  const [scoreForm, setScoreForm] = useState({ dateMatch: "", adversaire: "", scoreDogz: "", scoreAdv: "" });
+  const [scoreMsg, setScoreMsg] = useState("");
+  const [scoreError, setScoreError] = useState("");
+
+  const [eventForm, setEventForm] = useState({ dateEvent: "", heure: "", titre: "", statut: "Confirmé" });
+  const [eventMsg, setEventMsg] = useState("");
+  const [eventError, setEventError] = useState("");
 
   const handleLogout = () => {
+    localStorage.removeItem("dogz_token");
     localStorage.removeItem("dogz_admin");
     navigate("/admin");
   };
 
-  // 🔹 Charger les licenciés depuis le backend
   useEffect(() => {
     const fetchLicencies = async () => {
       try {
         setLoading(true);
         setError("");
-        const res = await fetch(API_URL);
+        const res = await fetch(API_LICENCIES);
         const data = await res.json();
         setLicencies(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("Erreur chargement licenciés dashboard:", err);
+      } catch {
         setError("Impossible de charger les licenciés.");
       } finally {
         setLoading(false);
       }
     };
-
     fetchLicencies();
   }, []);
 
+  const handleScoreChange = (e) => {
+    const { name, value } = e.target;
+    setScoreForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleScoreSubmit = async (e) => {
+    e.preventDefault();
+    setScoreMsg("");
+    setScoreError("");
+
+    if (!scoreForm.dateMatch || !scoreForm.adversaire) {
+      setScoreError("Date et adversaire requis.");
+      return;
+    }
+
+    try {
+      const payload = {
+        dateMatch: scoreForm.dateMatch,
+        adversaire: scoreForm.adversaire,
+        scoreDogz: scoreForm.scoreDogz === "" ? null : Number(scoreForm.scoreDogz),
+        scoreAdv: scoreForm.scoreAdv === "" ? null : Number(scoreForm.scoreAdv),
+        statut: "Joué",
+      };
+      const res = await authFetch(API_MATCHS, { method: "POST", body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (!res.ok) {
+        setScoreError(data.message || "Erreur lors de l'enregistrement.");
+        return;
+      }
+      setScoreMsg("Match enregistré avec succès.");
+      setScoreForm({ dateMatch: "", adversaire: "", scoreDogz: "", scoreAdv: "" });
+    } catch {
+      setScoreError("Erreur de communication avec le serveur.");
+    }
+  };
+
+  const handleEventChange = (e) => {
+    const { name, value } = e.target;
+    setEventForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEventSubmit = async (e) => {
+    e.preventDefault();
+    setEventMsg("");
+    setEventError("");
+
+    if (!eventForm.dateEvent || !eventForm.titre) {
+      setEventError("Date et titre requis.");
+      return;
+    }
+
+    try {
+      const payload = {
+        dateEvent: eventForm.dateEvent,
+        heure: eventForm.heure || null,
+        titre: eventForm.titre,
+        statut: eventForm.statut || "Confirmé",
+      };
+      const res = await authFetch(API_EVENEMENTS, { method: "POST", body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (!res.ok) {
+        setEventError(data.message || "Erreur lors de l'enregistrement.");
+        return;
+      }
+      setEventMsg("Événement ajouté avec succès.");
+      setEventForm({ dateEvent: "", heure: "", titre: "", statut: "Confirmé" });
+    } catch {
+      setEventError("Erreur de communication avec le serveur.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 px-4 py-6 md:px-8 md:py-8">
-      {/* Header admin + bouton déconnexion */}
       <div className="flex items-center justify-between mb-3">
         <h1 className="text-xl md:text-2xl font-bold">Panel Admin</h1>
-
         <button
           type="button"
           onClick={handleLogout}
@@ -58,86 +130,24 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      {/* NAVIGATION ADMIN */}
-      <nav className="w-full mb-6">
-        <div className="bg-slate-950/80 border border-slate-800 rounded-2xl px-2 py-2">
-          <p className="text-[11px] text-slate-500 px-1 mb-2">
-            Navigation admin
-          </p>
-
-          <div className="grid grid-cols-3 gap-2 md:flex md:flex-row md:gap-3">
-            {/* LICENCIÉS */}
-            <NavLink
-              to="/admin/licencies"
-              className={({ isActive }) =>
-                `${navBase} ${
-                  isActive
-                    ? "bg-red-600/90 text-white border-red-500 shadow-md shadow-red-900/30"
-                    : "bg-slate-900/60 text-slate-300 border-slate-700 hover:bg-slate-800 hover:border-slate-600"
-                }`
-              }
-            >
-              <Users className="w-4 h-4" />
-              <span>Licenciés</span>
-            </NavLink>
-
-            {/* RÉSULTATS */}
-            <NavLink
-              to="/admin/resultats"
-              className={({ isActive }) =>
-                `${navBase} ${
-                  isActive
-                    ? "bg-red-600/90 text-white border-red-500 shadow-md shadow-red-900/30"
-                    : "bg-slate-900/60 text-slate-300 border-slate-700 hover:bg-slate-800 hover:border-slate-600"
-                }`
-              }
-            >
-              <Trophy className="w-4 h-4" />
-              <span>Résultats</span>
-            </NavLink>
-
-            {/* CALENDRIER */}
-            <NavLink
-              to="/admin/calendrier"
-              className={({ isActive }) =>
-                `${navBase} ${
-                  isActive
-                    ? "bg-red-600/90 text-white border-red-500 shadow-md shadow-red-900/30"
-                    : "bg-slate-900/60 text-slate-300 border-slate-700 hover:bg-slate-800 hover:border-slate-600"
-                }`
-              }
-            >
-              <CalendarDays className="w-4 h-4" />
-              <span>Calendrier</span>
-            </NavLink>
-          </div>
-        </div>
-      </nav>
+      <AdminNav />
 
       <p className="text-xs md:text-sm text-slate-400 mb-4">
         Gestion des licenciés, résultats et calendrier.
       </p>
 
-      {/* Message d'erreur éventuel */}
       {error && (
         <div className="mb-3 text-xs md:text-sm text-red-300 bg-red-950/40 border border-red-700/60 rounded-lg px-3 py-2">
           {error}
         </div>
       )}
 
-      {/* === GRID PRINCIPALE === */}
       <div className="grid gap-4 lg:gap-6 lg:grid-cols-3">
         {/* LICENCIÉS (2/3) */}
         <section className="lg:col-span-2 bg-slate-950/70 border border-slate-800 rounded-2xl p-4 md:p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm md:text-base font-semibold">
-              Licenciés de l’équipe
-            </h2>
-            {loading && (
-              <span className="text-[11px] text-slate-400">
-                Chargement...
-              </span>
-            )}
+            <h2 className="text-sm md:text-base font-semibold">Licenciés de l'équipe</h2>
+            {loading && <span className="text-[11px] text-slate-400">Chargement...</span>}
           </div>
 
           <div className="overflow-x-auto">
@@ -149,39 +159,25 @@ export default function AdminDashboard() {
                   <th className="py-2">Statut</th>
                 </tr>
               </thead>
-
               <tbody>
                 {licencies.map((p) => (
-                  <tr
-                    key={p.id}
-                    className="border-b border-slate-800/60 last:border-b-0"
-                  >
+                  <tr key={p.id} className="border-b border-slate-800/60 last:border-b-0">
                     <td className="py-2 pr-4 whitespace-nowrap">{p.licence}</td>
-                    <td className="py-2 pr-4">
-                      {p.prenom} {p.nom}
-                    </td>
+                    <td className="py-2 pr-4">{p.prenom} {p.nom}</td>
                     <td className="py-2">
-                      <span
-                        className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold ${
-                          p.statut === "Actif"
-                            ? "bg-emerald-500/15 text-emerald-300"
-                            : p.statut === "Blessé"
-                            ? "bg-red-500/15 text-red-300"
-                            : "bg-amber-500/15 text-amber-300"
-                        }`}
-                      >
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold ${
+                        p.statut === "Actif" ? "bg-emerald-500/15 text-emerald-300"
+                        : p.statut === "Blessé" ? "bg-red-500/15 text-red-300"
+                        : "bg-amber-500/15 text-amber-300"
+                      }`}>
                         {p.statut || "Actif"}
                       </span>
                     </td>
                   </tr>
                 ))}
-
                 {!loading && licencies.length === 0 && (
                   <tr>
-                    <td
-                      colSpan={3}
-                      className="py-4 text-center text-[11px] text-slate-500"
-                    >
+                    <td colSpan={3} className="py-4 text-center text-[11px] text-slate-500">
                       Aucun licencié pour le moment.
                     </td>
                   </tr>
@@ -191,60 +187,36 @@ export default function AdminDashboard() {
           </div>
         </section>
 
-        {/* COLONNE DE DROITE : score + événements (toujours en démo pour l’instant) */}
+        {/* COLONNE DE DROITE */}
         <div className="flex flex-col gap-4">
           {/* FORMULAIRE SCORE */}
           <section className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 md:p-5">
-            <h2 className="text-sm md:text-base font-semibold mb-3">
-              Enregistrer un score
-            </h2>
+            <h2 className="text-sm md:text-base font-semibold mb-3">Enregistrer un score</h2>
 
-            <form className="space-y-3 text-xs md:text-sm">
+            {scoreError && <p className="text-[11px] text-red-300 mb-2">{scoreError}</p>}
+            {scoreMsg && <p className="text-[11px] text-emerald-300 mb-2">{scoreMsg}</p>}
+
+            <form className="space-y-3 text-xs md:text-sm" onSubmit={handleScoreSubmit}>
               <div className="flex flex-col gap-1">
                 <label className="text-slate-400">Date du match</label>
-                <input
-                  type="date"
-                  className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500"
-                />
+                <input type="date" name="dateMatch" value={scoreForm.dateMatch} onChange={handleScoreChange} className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500" />
               </div>
-
               <div className="flex flex-col gap-1">
                 <label className="text-slate-400">Adversaire</label>
-                <input
-                  type="text"
-                  placeholder="Nom de l'équipe"
-                  className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500"
-                />
+                <input type="text" name="adversaire" placeholder="Nom de l'équipe" value={scoreForm.adversaire} onChange={handleScoreChange} className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500" />
               </div>
-
               <div className="flex items-center gap-2">
                 <div className="flex-1">
                   <label className="text-slate-400 text-[11px]">DOGZ</label>
-                  <input
-                    type="number"
-                    min="0"
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-center focus:outline-none focus:ring-1 focus:ring-red-500"
-                  />
+                  <input type="number" min="0" name="scoreDogz" value={scoreForm.scoreDogz} onChange={handleScoreChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-center focus:outline-none focus:ring-1 focus:ring-red-500" />
                 </div>
-
-                <span className="text-slate-400 text-xs">-</span>
-
+                <span className="text-slate-400 text-xs mt-4">-</span>
                 <div className="flex-1">
-                  <label className="text-slate-400 text-[11px]">
-                    Adversaire
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-center focus:outline-none focus:ring-1 focus:ring-red-500"
-                  />
+                  <label className="text-slate-400 text-[11px]">Adversaire</label>
+                  <input type="number" min="0" name="scoreAdv" value={scoreForm.scoreAdv} onChange={handleScoreChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-center focus:outline-none focus:ring-1 focus:ring-red-500" />
                 </div>
               </div>
-
-              <button
-                type="button"
-                className="w-full bg-red-600 hover:bg-red-700 text-xs md:text-sm font-semibold rounded-lg py-2 transition"
-              >
+              <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-xs md:text-sm font-semibold rounded-lg py-2 transition">
                 Enregistrer
               </button>
             </form>
@@ -252,49 +224,33 @@ export default function AdminDashboard() {
 
           {/* FORMULAIRE ÉVÉNEMENTS */}
           <section className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 md:p-5">
-            <h2 className="text-sm md:text-base font-semibold mb-3">
-              Ajouter un événement
-            </h2>
+            <h2 className="text-sm md:text-base font-semibold mb-3">Ajouter un événement</h2>
 
-            <form className="space-y-3 text-xs md:text-sm">
+            {eventError && <p className="text-[11px] text-red-300 mb-2">{eventError}</p>}
+            {eventMsg && <p className="text-[11px] text-emerald-300 mb-2">{eventMsg}</p>}
+
+            <form className="space-y-3 text-xs md:text-sm" onSubmit={handleEventSubmit}>
               <div className="flex flex-col gap-1">
                 <label className="text-slate-400">Date</label>
-                <input
-                  type="date"
-                  className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500"
-                />
+                <input type="date" name="dateEvent" value={eventForm.dateEvent} onChange={handleEventChange} className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500" />
               </div>
-
               <div className="flex flex-col gap-1">
                 <label className="text-slate-400">Heure</label>
-                <input
-                  type="time"
-                  className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500"
-                />
+                <input type="time" name="heure" value={eventForm.heure} onChange={handleEventChange} className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500" />
               </div>
-
               <div className="flex flex-col gap-1">
                 <label className="text-slate-400">Titre / Match</label>
-                <input
-                  type="text"
-                  placeholder="Match vs Angers, déplacement..."
-                  className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500"
-                />
+                <input type="text" name="titre" placeholder="Match vs Angers, déplacement..." value={eventForm.titre} onChange={handleEventChange} className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500" />
               </div>
-
               <div className="flex flex-col gap-1">
                 <label className="text-slate-400">Statut</label>
-                <select className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500">
-                  <option>Confirmé</option>
-                  <option>À confirmer</option>
-                  <option>Annulé</option>
+                <select name="statut" value={eventForm.statut} onChange={handleEventChange} className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500">
+                  <option value="Confirmé">Confirmé</option>
+                  <option value="À confirmer">À confirmer</option>
+                  <option value="Annulé">Annulé</option>
                 </select>
               </div>
-
-              <button
-                type="button"
-                className="w-full bg-slate-700 hover:bg-slate-600 text-xs md:text-sm font-semibold rounded-lg py-2 transition"
-              >
+              <button type="submit" className="w-full bg-slate-700 hover:bg-slate-600 text-xs md:text-sm font-semibold rounded-lg py-2 transition">
                 Ajouter
               </button>
             </form>

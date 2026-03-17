@@ -2,28 +2,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL;
-
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 const API_URL = `${API_BASE_URL}/api/auth/login`;
 
 export default function Login() {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -32,7 +24,7 @@ export default function Login() {
     setSuccessMsg("");
 
     if (!formData.email || !formData.password) {
-      setError("Merci de remplir l’email et le mot de passe.");
+      setError("Merci de remplir l'email et le mot de passe.");
       return;
     }
 
@@ -41,13 +33,8 @@ export default function Login() {
 
       const res = await fetch(API_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
       });
 
       const data = await res.json();
@@ -57,16 +44,15 @@ export default function Login() {
         return;
       }
 
-      // Connexion OK → on peut stocker l'admin dans le localStorage
+      // Stocker le token JWT et les infos admin
+      localStorage.setItem("dogz_token", data.token);
       localStorage.setItem("dogz_admin", JSON.stringify(data.admin));
       setSuccessMsg("Connexion réussie, redirection…");
 
-      // Redirection vers le dashboard admin
       setTimeout(() => {
         navigate("/admindashboard");
       }, 800);
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError("Erreur de connexion au serveur.");
     } finally {
       setLoading(false);
@@ -99,12 +85,8 @@ export default function Login() {
         )}
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          {/* Email */}
           <div className="flex flex-col gap-1">
-            <label
-              htmlFor="email"
-              className="text-xs md:text-sm text-slate-300"
-            >
+            <label htmlFor="email" className="text-xs md:text-sm text-slate-300">
               Email admin
             </label>
             <input
@@ -119,12 +101,8 @@ export default function Login() {
             />
           </div>
 
-          {/* Password */}
           <div className="flex flex-col gap-1">
-            <label
-              htmlFor="password"
-              className="text-xs md:text-sm text-slate-300"
-            >
+            <label htmlFor="password" className="text-xs md:text-sm text-slate-300">
               Mot de passe
             </label>
             <input
@@ -139,7 +117,6 @@ export default function Login() {
             />
           </div>
 
-          {/* Bouton */}
           <button
             type="submit"
             disabled={loading}
@@ -150,7 +127,7 @@ export default function Login() {
         </form>
 
         <p className="text-[11px] text-slate-500 mt-4 text-center">
-          Besoin d’un accès ? Contactez le responsable de l’équipe.
+          Besoin d&apos;un accès ? Contactez le responsable de l&apos;équipe.
         </p>
       </div>
     </div>

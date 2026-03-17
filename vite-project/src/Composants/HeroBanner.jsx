@@ -38,14 +38,7 @@ const HeroBanner = () => {
             Voir le prochain match
           </NavLink>
 
-          {/* Lien vers Contact */}
-          <NavLink 
-            to="/contact" 
-            className="bg-transparent border-2 border-red-700 text-red-100 hover:bg-red-700 hover:text-white font-bold py-3 px-8 rounded-lg transition text-center"
-          >
-            Nous rejoindre
-          </NavLink>
-
+      
         </div>
       </div>
     </div>

@@ -14,6 +14,7 @@ import AdminPanel from "./Pages/AdminPanel.jsx";
 import AdminLicencies from "./Admin/AdminLicencies.jsx";
 import AdminResultats from "./Admin/AdminResultas.jsx";
 import AdminCalendrier from "./Admin/AdminCalendrier.jsx";
+import AdminComptes from "./Admin/AdminComptes.jsx";
 
 // Protection admin
 import RequireAdmin from "./Composants/RequireAdmin.jsx";
@@ -71,6 +72,14 @@ const router = createBrowserRouter([
     element: (
       <RequireAdmin>
         <AdminCalendrier />
+      </RequireAdmin>
+    ),
+  },
+  {
+    path: "/admin/comptes",
+    element: (
+      <RequireAdmin>
+        <AdminComptes />
       </RequireAdmin>
     ),
   },

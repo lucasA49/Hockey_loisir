@@ -2,7 +2,6 @@
 const db = require("../db");
 const bcrypt = require("bcryptjs");
 
-// Créer un admin (avec hash du mot de passe)
 function createAdmin({ email, password, nom, role }) {
   const hashedPassword = bcrypt.hashSync(password, 10);
 
@@ -18,10 +17,10 @@ function createAdmin({ email, password, nom, role }) {
     email,
     nom: nom || null,
     role: role || "admin",
+    dateCreation: new Date().toISOString(),
   };
 }
 
-// Trouver un admin par email
 function findByEmail(email) {
   const stmt = db.prepare(`
     SELECT
@@ -34,11 +33,29 @@ function findByEmail(email) {
     FROM admins
     WHERE email = ?
   `);
-
   return stmt.get(email) || null;
 }
 
-// Vérifier un mot de passe (compare texte vs hash)
+function getAllAdmins() {
+  const stmt = db.prepare(`
+    SELECT
+      id,
+      email,
+      nom,
+      role,
+      date_creation AS dateCreation
+    FROM admins
+    ORDER BY date_creation ASC
+  `);
+  return stmt.all();
+}
+
+function deleteAdmin(id) {
+  const stmt = db.prepare(`DELETE FROM admins WHERE id = ?`);
+  const info = stmt.run(id);
+  return info.changes > 0;
+}
+
 function verifyPassword(plainPassword, hashedPassword) {
   return bcrypt.compareSync(plainPassword, hashedPassword);
 }
@@ -46,5 +63,7 @@ function verifyPassword(plainPassword, hashedPassword) {
 module.exports = {
   createAdmin,
   findByEmail,
+  getAllAdmins,
+  deleteAdmin,
   verifyPassword,
 };

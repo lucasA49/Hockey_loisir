@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Variables d'environnement (ne jamais commiter)
+.env
+.env.local
+.env.production
+server/.env
+server/dogz.db
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

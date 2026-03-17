@@ -1,107 +1,60 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL;
-const API_MATCHS = `${API_BASE_URL}/api/matchs`;
-const API_EVENTS = `${API_BASE_URL}/api/evenements`;
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_MATCHS   = `${API_BASE_URL}/api/matchs`;
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return "";
+const formatDate = (d) => {
+  if (!d) return "";
   try {
-    const d = new Date(dateStr);
-    return new Intl.DateTimeFormat("fr-FR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    }).format(d);
-  } catch {
-    return dateStr;
-  }
+    return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "long", year: "numeric" }).format(new Date(d));
+  } catch { return d; }
 };
 
-const formatDateWithWeekday = (dateStr) => {
-  if (!dateStr) return "";
+const formatDateWithWeekday = (d) => {
+  if (!d) return "";
   try {
-    const d = new Date(dateStr);
     return new Intl.DateTimeFormat("fr-FR", {
-      weekday: "long",
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    }).format(d);
-  } catch {
-    return dateStr;
-  }
+      weekday: "long", day: "2-digit", month: "long", year: "numeric",
+    }).format(new Date(d));
+  } catch { return d; }
 };
 
 export default function MatchDashboard() {
-  const [nextEvent, setNextEvent] = useState(null);
-  const [recentResults, setRecentResults] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [nextMatch,      setNextMatch]      = useState(null);
+  const [recentResults,  setRecentResults]  = useState([]);
+  const [loading,        setLoading]        = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        const res  = await fetch(API_MATCHS);
+        const data = await res.json();
 
-        const [resMatchs, resEvents] = await Promise.all([
-          fetch(API_MATCHS),
-          fetch(API_EVENTS),
-        ]);
+        if (!Array.isArray(data)) return;
 
-        const matchsData = await resMatchs.json();
-        const eventsData = await resEvents.json();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-        const now = new Date();
+        // ── Prochain match : premier match "À venir" dont la date >= aujourd'hui ──
+        const upcoming = data
+          .filter((m) => m.statut === "À venir" && m.dateMatch)
+          .map((m) => ({ ...m, _date: new Date(m.dateMatch + "T" + (m.heure || "00:00")) }))
+          .filter((m) => m._date >= today)
+          .sort((a, b) => a._date - b._date);
 
-        // === PROCHAIN MATCH depuis les EVENEMENTS ===
-        if (Array.isArray(eventsData)) {
-          const upcoming = eventsData
-            .filter((e) => {
-              if (!e.dateEvent) return false;
-              if (e.statut === "Annulé") return false;
+        setNextMatch(upcoming[0] || null);
 
-              const dateTime = new Date(
-                e.dateEvent + "T" + (e.heure || "00:00")
-              );
-              return dateTime >= now;
-            })
-            .map((e) => ({
-              ...e,
-              dateObj: new Date(e.dateEvent + "T" + (e.heure || "00:00")),
-            }))
-            .sort((a, b) => a.dateObj - b.dateObj);
+        // ── Résultats récents : matchs joués avec score, les 2 plus récents ──
+        const played = data
+          .filter((m) => m.statut === "Joué" && m.scoreDogz != null && m.scoreAdv != null)
+          .sort((a, b) => (b.dateMatch || "").localeCompare(a.dateMatch || ""))
+          .slice(0, 2);
 
-          setNextEvent(upcoming[0] || null);
-        } else {
-          setNextEvent(null);
-        }
-
-        // === DERNIERS RÉSULTATS depuis les MATCHS ===
-        if (Array.isArray(matchsData)) {
-          const played = matchsData
-            .filter(
-              (m) =>
-                m.statut === "Joué" &&
-                m.scoreDogz != null &&
-                m.scoreAdv != null
-            )
-            .sort((a, b) => {
-              const da = a.dateMatch || "";
-              const db = b.dateMatch || "";
-              if (da < db) return 1;
-              if (da > db) return -1;
-              return 0;
-            })
-            .slice(0, 2);
-
-          setRecentResults(played);
-        } else {
-          setRecentResults([]);
-        }
-      } catch (err) {
-        console.error("Erreur fetch dashboard:", err);
+        setRecentResults(played);
+      } catch {
+        // silencieux côté public
       } finally {
         setLoading(false);
       }
@@ -113,65 +66,53 @@ export default function MatchDashboard() {
   return (
     <div className="max-w-5xl mx-auto px-4 relative z-10">
       <div className="-mt-24 bg-white rounded-3xl shadow-2xl p-6 md:p-10 mb-10 border border-gray-100">
-        {/* --- PARTIE 1 : PROCHAIN MATCH (depuis evenements) --- */}
+
+        {/* ── PROCHAIN MATCH ── */}
         <div className="text-center mb-12">
-          <h3 className="text-3xl font-bold text-gray-900 mb-8">
-            Prochain match
-          </h3>
+          <h3 className="text-3xl font-bold text-gray-900 mb-8">Prochain match</h3>
 
           {loading ? (
             <div className="bg-gray-50 rounded-2xl p-6 animate-pulse h-40" />
-          ) : nextEvent ? (
-            <div className="flex flex-col md:flex-row items-center justify-center gap-8 bg-gray-50 rounded-2xl p-6 border border-gray-200">
-              {/* Infos */}
-              <div className="text-left md:w-1/3">
-                <div className="text-xl font-bold text-gray-900">
-                  {formatDateWithWeekday(nextEvent.dateEvent)}
-                </div>
-                {nextEvent.heure && (
-                  <div className="text-red-600 font-bold">
-                    {nextEvent.heure}
-                  </div>
+          ) : nextMatch ? (
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 bg-gray-50 rounded-2xl p-6 border border-gray-200">
+              {/* Date + lieu */}
+              <div className="text-center md:text-left md:w-1/3">
+                <p className="text-lg md:text-xl font-bold text-gray-900 capitalize">
+                  {formatDateWithWeekday(nextMatch.dateMatch)}
+                </p>
+                {nextMatch.heure && (
+                  <p className="text-red-600 font-bold text-lg">{nextMatch.heure}</p>
                 )}
-                <div className="text-gray-500 mt-1">
-                  Patinoire de Cholet
-                </div>
+                {nextMatch.lieu && (
+                  <p className="text-gray-500 text-sm mt-1">{nextMatch.lieu}</p>
+                )}
               </div>
 
-              {/* Duel visuel (DOGZ vs ADV générique) */}
-              <div className="flex items-center gap-6 md:w-1/3 justify-center">
-                <div className="w-20 h-20 rounded-full bg-black flex items-center justify-center border-4 border-red-600 shadow-md">
-                  <span className="text-white font-bold">DOGZ</span>
+              {/* Duel visuel */}
+              <div className="flex items-center gap-4 md:gap-6 md:w-1/3 justify-center">
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-black flex items-center justify-center border-4 border-red-600 shadow-md shrink-0">
+                  <span className="text-white font-bold text-xs md:text-sm">DOGZ</span>
                 </div>
-                <span className="text-2xl font-black text-gray-400 italic">
-                  VS
-                </span>
-                <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center border-2 border-gray-400">
-                  <span className="text-gray-600 text-[10px] font-bold text-center">
-                    ADV
+                <span className="text-xl md:text-2xl font-black text-gray-400 italic">VS</span>
+                <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-300 shrink-0">
+                  <span className="text-gray-600 text-[10px] font-bold text-center px-1">
+                    {nextMatch.adversaire}
                   </span>
                 </div>
               </div>
 
-              {/* Tag / type d'événement */}
-              <div className="text-right md:w-1/3 hidden md:block">
-                <span className="inline-block px-4 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-bold">
-                  {nextEvent.statut || "Amical / Loisir"}
+              {/* Statut */}
+              <div className="text-center md:text-right md:w-1/3">
+                <span className="inline-block px-4 py-1 rounded-full bg-amber-100 text-amber-800 text-sm font-bold">
+                  {nextMatch.statut}
                 </span>
-                {nextEvent.titre && (
-                  <p className="mt-2 text-xs text-gray-500">
-                    {nextEvent.titre}
-                  </p>
-                )}
               </div>
             </div>
           ) : (
             <div className="bg-gray-50 rounded-2xl p-6 border border-dashed border-gray-300">
               <p className="text-gray-500 text-sm">
-                Aucun match à venir pour le moment. Dès que tu ajoutes un
-                événement dans l&apos;admin (Calendrier) avec une date
-                future et un statut différent de &quot;Annulé&quot;, il
-                s&apos;affichera ici.
+                Aucun match à venir pour le moment.{" "}
+                Ajoutez un match avec le statut <strong>À venir</strong> dans le panel admin pour l&apos;afficher ici.
               </p>
             </div>
           )}
@@ -180,13 +121,13 @@ export default function MatchDashboard() {
             to="/calendrier"
             className="inline-block mt-6 w-full md:w-auto bg-gray-900 hover:bg-black text-white font-bold py-3 px-12 rounded-lg transition text-center"
           >
-            Voir les détails
+            Voir le calendrier complet
           </NavLink>
         </div>
 
         <hr className="border-gray-200 my-8" />
 
-        {/* --- PARTIE 2 : RÉSULTATS RÉCENTS (depuis matchs) --- */}
+        {/* ── RÉSULTATS RÉCENTS ── */}
         <div>
           <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center md:text-left">
             Résultats récents
@@ -204,30 +145,22 @@ export default function MatchDashboard() {
               <tbody className="text-gray-700">
                 {loading ? (
                   <tr>
-                    <td colSpan={3} className="py-6 text-center text-gray-400">
-                      Chargement...
-                    </td>
+                    <td colSpan={3} className="py-6 text-center text-gray-400">Chargement...</td>
                   </tr>
                 ) : recentResults.length === 0 ? (
                   <tr>
                     <td colSpan={3} className="py-6 text-center text-gray-400">
-                      Aucun match joué pour le moment.
+                      Aucun résultat pour le moment.
                     </td>
                   </tr>
                 ) : (
                   recentResults.map((m) => (
-                    <tr
-                      key={m.id}
-                      className="border-b border-gray-50 hover:bg-gray-50 transition"
-                    >
-                      <td className="py-4 font-medium">
-                        {formatDate(m.dateMatch)}
-                      </td>
+                    <tr key={m.id} className="border-b border-gray-50 hover:bg-gray-50 transition">
+                      <td className="py-4 font-medium whitespace-nowrap">{formatDate(m.dateMatch)}</td>
                       <td className="py-4">
-                        <span className="font-bold">DOGZ</span> vs{" "}
-                        {m.adversaire || "Adversaire"}
+                        <span className="font-bold">DOGZ</span> vs {m.adversaire || "Adversaire"}
                       </td>
-                      <td className="py-4 text-right font-bold text-green-600">
+                      <td className="py-4 text-right font-bold text-green-600 whitespace-nowrap">
                         {m.scoreDogz} — {m.scoreAdv}
                       </td>
                     </tr>
@@ -246,6 +179,7 @@ export default function MatchDashboard() {
             </NavLink>
           </div>
         </div>
+
       </div>
     </div>
   );
