@@ -60,7 +60,7 @@ function createMatch(data) {
     dateMatch,
     heure || "",              // heure_match est NOT NULL → on envoie au moins une string vide
     adversaire,
-    lieu || null,
+    lieu || "",                // lieu est NOT NULL → idem
     scoreDogz ?? null,
     scoreAdv ?? null,
     statut || "À venir"

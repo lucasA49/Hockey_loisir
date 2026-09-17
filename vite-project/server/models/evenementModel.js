@@ -53,7 +53,7 @@ function createEvenement(data) {
 
   const info = stmt.run(
     dateEvent,
-    heure || null,
+    heure || "",                // heure_event est NOT NULL → on envoie au moins une string vide
     titre,
     statut || "Confirmé",
     safeType
