@@ -104,11 +104,11 @@ export default function MatchCalendar() {
         {matches.map((m, index) => (
           <div
             key={m.id}
-            className={`px-4 md:px-6 py-3 flex items-center justify-between ${
+            className={`px-4 md:px-6 py-3 flex items-center justify-between gap-3 ${
               index !== matches.length - 1 ? "border-b border-slate-100" : ""
             }`}
           >
-            <div className="flex flex-col">
+            <div className="flex flex-col min-w-0">
               <span className="text-sm md:text-base font-semibold text-slate-900">
                 {formatDate(m.dateMatch)}{" "}
                 {m.heure && (
@@ -126,7 +126,7 @@ export default function MatchCalendar() {
             </div>
 
             <span
-              className={`text-[11px] md:text-xs font-semibold px-3 py-1 rounded-full ${getBadgeClasses(
+              className={`shrink-0 text-[11px] md:text-xs font-semibold px-3 py-1 rounded-full ${getBadgeClasses(
                 m.statut
               )}`}
             >

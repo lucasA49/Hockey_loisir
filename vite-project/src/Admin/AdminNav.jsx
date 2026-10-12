@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+ import { NavLink } from "react-router-dom";
 import { Users, Trophy, CalendarDays, UserCog } from "lucide-react";
 
 export default function AdminNav() {

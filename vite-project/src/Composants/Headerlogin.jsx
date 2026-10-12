@@ -1,8 +1,15 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom"; // Import essentiel
+import { NavLink, useNavigate } from "react-router-dom"; // Import essentiel
 
 const HeaderLogin = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("dogz_token");
+    localStorage.removeItem("dogz_admin");
+    navigate("/");
+  };
 
   // Fonction pour gérer le style des liens (Actif vs Inactif)
   const linkClass = ({ isActive }) =>
@@ -80,9 +87,29 @@ const HeaderLogin = () => {
             </NavLink>
           </div>
 
-          {/* --- PARTIE DROITE : ADMIN --- */}
+          {/* --- PARTIE DROITE : DÉCONNEXION --- */}
           <div className="flex-1 flex items-center justify-end">
-      
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="text-gray-300 hover:text-white font-medium text-sm flex items-center gap-2"
+            >
+              <span className="hidden md:inline">Déconnexion</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+            </button>
           </div>
         </div>
       </div>

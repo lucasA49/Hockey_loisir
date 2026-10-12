@@ -130,7 +130,7 @@ export default function AdminLicencies() {
           </h2>
 
           <form className="space-y-3 text-xs md:text-sm" onSubmit={handleSubmit}>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="flex flex-col gap-1">
                 <label className="text-slate-400">Prénom *</label>
                 <input name="prenom" type="text" value={formData.prenom} onChange={handleChange} placeholder="Prénom"
@@ -142,7 +142,7 @@ export default function AdminLicencies() {
                   className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="flex flex-col gap-1">
                 <label className="text-slate-400">Date de naissance *</label>
                 <input name="dateNaissance" type="date" value={formData.dateNaissance} onChange={handleChange}
@@ -154,7 +154,7 @@ export default function AdminLicencies() {
                   className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="flex flex-col gap-1">
                 <label className="text-slate-400">Poste</label>
                 <input name="poste" type="text" value={formData.poste} onChange={handleChange} placeholder="Gardien..."

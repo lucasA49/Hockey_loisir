@@ -128,8 +128,8 @@ export default function AdminResultats() {
           </h2>
 
           <form className="space-y-3 text-xs md:text-sm" onSubmit={handleSubmit}>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1 col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1 sm:col-span-2">
                 <label className="text-slate-400">Date du match *</label>
                 <input type="date" name="dateMatch" value={formData.dateMatch} onChange={handleChange}
                   className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500" />
@@ -148,12 +148,12 @@ export default function AdminResultats() {
                   <option value="Annulé">Annulé</option>
                 </select>
               </div>
-              <div className="flex flex-col gap-1 col-span-2">
+              <div className="flex flex-col gap-1 sm:col-span-2">
                 <label className="text-slate-400">Adversaire *</label>
                 <input type="text" name="adversaire" placeholder="Angers, Nantes..." value={formData.adversaire} onChange={handleChange}
                   className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500" />
               </div>
-              <div className="flex flex-col gap-1 col-span-2">
+              <div className="flex flex-col gap-1 sm:col-span-2">
                 <label className="text-slate-400">Lieu</label>
                 <input type="text" name="lieu" placeholder="Cholet, Angers..." value={formData.lieu} onChange={handleChange}
                   className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-red-500" />

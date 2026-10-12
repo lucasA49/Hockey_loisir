@@ -221,16 +221,16 @@ export default function AdminCalendrier() {
 
           <div className="bg-slate-900/60 rounded-xl divide-y divide-slate-800">
             {events.map((e) => (
-              <div key={e.id} className="px-3 py-3 flex items-center justify-between">
-                <div>
+              <div key={e.id} className="px-3 py-3 flex items-center justify-between gap-3">
+                <div className="min-w-0">
                   <p className="text-xs md:text-sm font-semibold">
                     {formatDate(e.dateEvent)}{" "}
                     {e.heure && (<>• <span className="text-slate-300">{e.heure}</span></>)}
                   </p>
-                  <p className="text-[11px] md:text-xs text-slate-400">{e.titre}</p>
+                  <p className="text-[11px] md:text-xs text-slate-400 break-words">{e.titre}</p>
                   <p className="text-[11px] text-slate-500">Statut : {e.statut}</p>
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 shrink-0">
                   <button type="button" onClick={() => handleEdit(e)} className="text-[11px] text-slate-300 border border-slate-600 rounded-full px-3 py-1 hover:bg-slate-800">
                     Modifier
                   </button>
