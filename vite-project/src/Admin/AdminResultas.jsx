@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import AdminNav from "./AdminNav";
 import { authFetch } from "../utils/authFetch";
+import NiveauBadge from "../Composants/NiveauBadge";
+import { NIVEAUX } from "../utils/niveaux";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 const API_URL = `${API_BASE_URL}/api/matchs`;
@@ -25,7 +27,7 @@ export default function AdminResultats() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const emptyForm = { dateMatch: "", heure: "", adversaire: "", lieu: "", scoreDogz: "", scoreAdv: "", statut: "À venir" };
+  const emptyForm = { dateMatch: "", heure: "", adversaire: "", lieu: "", scoreDogz: "", scoreAdv: "", statut: "À venir", niveau: "" };
   const [formData, setFormData] = useState(emptyForm);
 
   useEffect(() => {
@@ -88,6 +90,7 @@ export default function AdminResultats() {
       scoreDogz: m.scoreDogz == null ? "" : String(m.scoreDogz),
       scoreAdv:  m.scoreAdv  == null ? "" : String(m.scoreAdv),
       statut:    m.statut    || "À venir",
+      niveau:    m.niveau    || "",
     });
     setError(""); setMessage("");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -147,6 +150,26 @@ export default function AdminResultats() {
                   <option value="Joué">Joué</option>
                   <option value="Annulé">Annulé</option>
                 </select>
+              </div>
+              <div className="flex flex-col gap-1 sm:col-span-2">
+                <label className="text-slate-400">Niveau</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {NIVEAUX.map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setFormData((p) => ({ ...p, niveau: p.niveau === n ? "" : n }))}
+                      aria-pressed={formData.niveau === n}
+                      className={`rounded-lg border px-2 py-2 text-[11px] md:text-xs font-semibold transition ${
+                        formData.niveau === n
+                          ? "bg-red-600 border-red-500 text-white"
+                          : "bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500"
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="flex flex-col gap-1 sm:col-span-2">
                 <label className="text-slate-400">Adversaire *</label>
@@ -236,8 +259,11 @@ export default function AdminResultats() {
                 </div>
 
                 {/* Ligne 3 : lieu */}
-                {m.lieu && (
-                  <p className="text-[11px] text-slate-500 mb-2">{m.lieu}</p>
+                {(m.lieu || m.niveau) && (
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    {m.lieu && <p className="text-[11px] text-slate-500">{m.lieu}</p>}
+                    <NiveauBadge niveau={m.niveau} theme="dark" />
+                  </div>
                 )}
 
                 {/* Actions */}
@@ -264,6 +290,7 @@ export default function AdminResultats() {
                   <th className="py-2 pr-3 font-medium">Heure</th>
                   <th className="py-2 pr-3 font-medium">Adversaire</th>
                   <th className="py-2 pr-3 font-medium">Lieu</th>
+                  <th className="py-2 pr-3 font-medium">Niveau</th>
                   <th className="py-2 pr-3 font-medium">Score</th>
                   <th className="py-2 pr-3 font-medium">Statut</th>
                   <th className="py-2 text-right font-medium">Actions</th>
@@ -272,7 +299,7 @@ export default function AdminResultats() {
               <tbody>
                 {matchs.length === 0 && !loading && (
                   <tr>
-                    <td colSpan={7} className="py-4 text-center text-[11px] text-slate-500">
+                    <td colSpan={8} className="py-4 text-center text-[11px] text-slate-500">
                       Aucun match enregistré.
                     </td>
                   </tr>
@@ -283,6 +310,7 @@ export default function AdminResultats() {
                     <td className="py-2.5 pr-3 whitespace-nowrap text-slate-400">{m.heure || "–"}</td>
                     <td className="py-2.5 pr-3 font-medium">{m.adversaire}</td>
                     <td className="py-2.5 pr-3 text-slate-400">{m.lieu || "–"}</td>
+                    <td className="py-2.5 pr-3">{m.niveau ? <NiveauBadge niveau={m.niveau} theme="dark" /> : <span className="text-slate-500">–</span>}</td>
                     <td className="py-2.5 pr-3 font-bold text-red-400 whitespace-nowrap">
                       {m.scoreDogz == null || m.scoreAdv == null ? "–" : `${m.scoreDogz} – ${m.scoreAdv}`}
                     </td>

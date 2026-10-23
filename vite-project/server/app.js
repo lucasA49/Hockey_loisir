@@ -1,8 +1,9 @@
 // server/app.js
-require("dotenv").config();
+const path = require("path");
+// Charge server/.env quel que soit le dossier d'où le serveur est lancé
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 const licencieRoutes = require("./routes/licencieRoutes");
 const authRoutes = require("./routes/authRoutes");
 const matchRoutes = require("./routes/matchRoutes");

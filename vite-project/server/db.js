@@ -40,6 +40,7 @@ db.exec(`
     score_adv INTEGER,
     statut TEXT NOT NULL DEFAULT 'À venir', -- À venir / Terminé / Annulé
     type TEXT,                              -- Amical / Tournoi / etc.
+    niveau TEXT,                            -- Débutant / Intermédiaire / Confirmé
     commentaire TEXT
   );
 
@@ -54,6 +55,36 @@ db.exec(`
     match_id INTEGER,                       -- optionnel, lien vers un match
     FOREIGN KEY (match_id) REFERENCES matchs(id) ON DELETE SET NULL
   );
+
+  -- Lignes de la composition d'un match (attaque / défense / gardien)
+  CREATE TABLE IF NOT EXISTS match_lignes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    match_id INTEGER NOT NULL,
+    categorie TEXT NOT NULL CHECK (categorie IN ('attaque', 'defense', 'gardien')),
+    numero INTEGER NOT NULL,                -- Ligne 1, Ligne 2...
+    FOREIGN KEY (match_id) REFERENCES matchs(id) ON DELETE CASCADE,
+    UNIQUE (match_id, categorie, numero)
+  );
+
+  -- Joueurs placés dans une ligne
+  CREATE TABLE IF NOT EXISTS match_ligne_joueurs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ligne_id INTEGER NOT NULL,
+    prenom TEXT NOT NULL,
+    ordre INTEGER NOT NULL,
+    FOREIGN KEY (ligne_id) REFERENCES match_lignes(id) ON DELETE CASCADE
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_match_lignes_match ON match_lignes(match_id);
+  CREATE INDEX IF NOT EXISTS idx_ligne_joueurs_ligne ON match_ligne_joueurs(ligne_id);
 `);
+
+db.pragma("foreign_keys = ON");
+
+// Migrations : ajoute les colonnes manquantes sur une base existante
+const colonnesMatchs = db.prepare("PRAGMA table_info(matchs)").all().map((c) => c.name);
+if (!colonnesMatchs.includes("niveau")) {
+  db.exec("ALTER TABLE matchs ADD COLUMN niveau TEXT");
+}
 
 module.exports = db;

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import NiveauBadge from "./NiveauBadge";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 const API_URL = `${API_BASE_URL}/api/matchs`;
@@ -126,8 +127,11 @@ export default function Resultat() {
                       <p className="text-4xl font-black text-slate-200">{lastMatch.scoreAdv ?? "-"}</p>
                     </div>
                   </div>
-                  {lastMatch.lieu && (
-                    <p className="text-xs text-slate-500 mt-2">{lastMatch.lieu}</p>
+                  {(lastMatch.lieu || lastMatch.niveau) && (
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      {lastMatch.lieu && <p className="text-xs text-slate-500">{lastMatch.lieu}</p>}
+                      <NiveauBadge niveau={lastMatch.niveau} theme="dark" />
+                    </div>
                   )}
                 </div>
 
@@ -173,8 +177,11 @@ export default function Resultat() {
                         </span>
                       )}
                     </div>
-                    {m.lieu && (
-                      <p className="text-[11px] text-slate-500 mt-1">{m.lieu}</p>
+                    {(m.lieu || m.niveau) && (
+                      <div className="flex flex-wrap items-center gap-2 mt-1">
+                        {m.lieu && <p className="text-[11px] text-slate-500">{m.lieu}</p>}
+                        <NiveauBadge niveau={m.niveau} theme="dark" />
+                      </div>
                     )}
                   </div>
                 );
@@ -203,6 +210,7 @@ export default function Resultat() {
                         </td>
                         <td className="py-3 pr-4 font-medium">
                           <span className="font-bold">DOGZ</span> vs {m.adversaire}
+                          <NiveauBadge niveau={m.niveau} theme="dark" className="ml-2 align-middle" />
                         </td>
                         <td className="py-3 pr-4 font-bold text-red-400 whitespace-nowrap">
                           {m.scoreDogz == null || m.scoreAdv == null ? "–" : `${m.scoreDogz} – ${m.scoreAdv}`}

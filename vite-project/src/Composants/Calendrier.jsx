@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { ChevronRight } from "lucide-react";
+import NiveauBadge from "./NiveauBadge";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 const API_MATCHS     = `${API_BASE_URL}/api/matchs`;
@@ -52,10 +55,12 @@ export default function Calendrier() {
             if (!m.dateMatch) return;
             merged.push({
               id:      `match-${m.id}`,
+              matchId: m.id,
               dateStr: m.dateMatch,
               heure:   m.heure || "",
               titre:   `DOGZ vs ${m.adversaire}`,
               lieu:    m.lieu || "",
+              niveau:  m.niveau || null,
               statut:  m.statut || "À venir",
               score:   (m.scoreDogz != null && m.scoreAdv != null) ? `${m.scoreDogz} – ${m.scoreAdv}` : null,
               type:    "match",
@@ -171,8 +176,14 @@ export default function Calendrier() {
 }
 
 function ItemRow({ item, past = false }) {
+  const isMatch = item.type === "match";
+  const Wrapper = isMatch ? Link : "div";
+  const wrapperProps = isMatch
+    ? { to: `/match/${item.matchId}`, className: "px-4 py-4 flex items-start gap-3 sm:items-center sm:gap-4 hover:bg-slate-50 transition cursor-pointer" }
+    : { className: "px-4 py-4 flex items-start gap-3 sm:items-center sm:gap-4" };
+
   return (
-    <div className="px-4 py-4 flex items-start gap-3 sm:items-center sm:gap-4">
+    <Wrapper {...wrapperProps}>
       {/* Badge type */}
       <div className={`shrink-0 hidden sm:flex items-center justify-center w-10 h-10 rounded-xl border text-xs font-bold ${TYPE_STYLE[item.type] || TYPE_STYLE.evenement}`}>
         {item.type === "match" ? "⚡" : "📅"}
@@ -191,6 +202,7 @@ function ItemRow({ item, past = false }) {
           {item.lieu && (
             <span className="text-[11px] text-slate-400">{item.lieu}</span>
           )}
+          <NiveauBadge niveau={item.niveau} />
           {item.score && (
             <span className="text-[11px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
               {item.score}
@@ -203,6 +215,8 @@ function ItemRow({ item, past = false }) {
       <span className={`shrink-0 text-[11px] font-semibold px-3 py-1 rounded-full whitespace-nowrap ${STATUT_STYLE[item.statut] || "bg-slate-100 text-slate-600"}`}>
         {item.statut}
       </span>
-    </div>
+
+      {isMatch && <ChevronRight className="shrink-0 w-4 h-4 text-slate-300 self-center" />}
+    </Wrapper>
   );
 }

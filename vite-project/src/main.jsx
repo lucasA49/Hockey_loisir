@@ -8,6 +8,7 @@ import Home from "./Pages/Home.jsx";
 import Login from "./Pages/Login.jsx";
 import Resultat from "./Pages/Resultat.jsx";
 import Calendar from "./Pages/Calendar.jsx";
+import MatchDetail from "./Pages/MatchDetail.jsx";
 
 // Pages admin
 import AdminPanel from "./Pages/AdminPanel.jsx";
@@ -15,6 +16,7 @@ import AdminLicencies from "./Admin/AdminLicencies.jsx";
 import AdminResultats from "./Admin/AdminResultas.jsx";
 import AdminCalendrier from "./Admin/AdminCalendrier.jsx";
 import AdminComptes from "./Admin/AdminComptes.jsx";
+import AdminCompositions from "./Admin/AdminCompositions.jsx";
 
 // Protection admin
 import RequireAdmin from "./Composants/RequireAdmin.jsx";
@@ -38,6 +40,10 @@ const router = createBrowserRouter([
   {
     path: "/resultats",
     element: <Resultat />,
+  },
+  {
+    path: "/match/:id",
+    element: <MatchDetail />,
   },
 
   // -------------------------
@@ -72,6 +78,14 @@ const router = createBrowserRouter([
     element: (
       <RequireAdmin>
         <AdminCalendrier />
+      </RequireAdmin>
+    ),
+  },
+  {
+    path: "/admin/compositions",
+    element: (
+      <RequireAdmin>
+        <AdminCompositions />
       </RequireAdmin>
     ),
   },

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
+import NiveauBadge from "./NiveauBadge";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 const API_MATCHS   = `${API_BASE_URL}/api/matchs`;
@@ -86,6 +87,7 @@ export default function MatchDashboard() {
                 {nextMatch.lieu && (
                   <p className="text-gray-500 text-sm mt-1">{nextMatch.lieu}</p>
                 )}
+                <NiveauBadge niveau={nextMatch.niveau} className="mt-2" />
               </div>
 
               {/* Duel visuel */}
@@ -159,6 +161,7 @@ export default function MatchDashboard() {
                       <td className="py-4 font-medium whitespace-nowrap">{formatDate(m.dateMatch)}</td>
                       <td className="py-4">
                         <span className="font-bold">DOGZ</span> vs {m.adversaire || "Adversaire"}
+                        <NiveauBadge niveau={m.niveau} className="ml-2 align-middle" />
                       </td>
                       <td className="py-4 text-right font-bold text-green-600 whitespace-nowrap">
                         {m.scoreDogz} — {m.scoreAdv}

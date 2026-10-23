@@ -1,6 +1,13 @@
 // server/controllers/matchController.js
 const matchModel = require("../models/matchModel");
 
+const NIVEAUX = ["Débutant", "Intermédiaire", "Confirmé"];
+
+// Le niveau est optionnel : vide/null = non précisé
+function niveauInvalide(niveau) {
+  return niveau !== undefined && niveau !== null && niveau !== "" && !NIVEAUX.includes(niveau);
+}
+
 function getAllMatchs(req, res) {
   try {
     const rows = matchModel.getAllMatchs();
@@ -40,12 +47,16 @@ function createMatch(req, res) {
       scoreDogz,
       scoreAdv,
       statut,
+      niveau,
     } = req.body || {};
 
     if (!dateMatch || !adversaire) {
       return res.status(400).json({
         message: "Champs requis : dateMatch, adversaire.",
       });
+    }
+    if (niveauInvalide(niveau)) {
+      return res.status(400).json({ message: `Niveau invalide (${NIVEAUX.join(", ")}).` });
     }
 
     const match = matchModel.createMatch({
@@ -56,6 +67,7 @@ function createMatch(req, res) {
       scoreDogz,
       scoreAdv,
       statut,
+      niveau,
     });
 
     return res.status(201).json(match);
@@ -70,6 +82,10 @@ function updateMatch(req, res) {
     const id = Number(req.params.id);
     if (!id) {
       return res.status(400).json({ message: "ID invalide." });
+    }
+
+    if (niveauInvalide(req.body?.niveau)) {
+      return res.status(400).json({ message: `Niveau invalide (${NIVEAUX.join(", ")}).` });
     }
 
     const match = matchModel.updateMatch(id, req.body || {});

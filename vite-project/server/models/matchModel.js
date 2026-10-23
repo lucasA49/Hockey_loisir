@@ -12,7 +12,8 @@ function getAllMatchs() {
       lieu,
       score_dogz AS scoreDogz,
       score_adv AS scoreAdv,
-      statut
+      statut,
+      niveau
     FROM matchs
     ORDER BY date_match DESC, heure_match DESC
   `);
@@ -31,7 +32,8 @@ function getMatchById(id) {
       lieu,
       score_dogz AS scoreDogz,
       score_adv AS scoreAdv,
-      statut
+      statut,
+      niveau
     FROM matchs
     WHERE id = ?
   `);
@@ -49,11 +51,12 @@ function createMatch(data) {
     scoreDogz,
     scoreAdv,
     statut,
+    niveau,
   } = data;
 
   const stmt = db.prepare(`
-    INSERT INTO matchs (date_match, heure_match, adversaire, lieu, score_dogz, score_adv, statut)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO matchs (date_match, heure_match, adversaire, lieu, score_dogz, score_adv, statut, niveau)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const info = stmt.run(
@@ -63,7 +66,8 @@ function createMatch(data) {
     lieu || "",                // lieu est NOT NULL → idem
     scoreDogz ?? null,
     scoreAdv ?? null,
-    statut || "À venir"
+    statut || "À venir",
+    niveau || null
   );
 
   return getMatchById(info.lastInsertRowid);
@@ -84,11 +88,12 @@ function updateMatch(id, data) {
     scoreAdv:
       data.scoreAdv !== undefined ? data.scoreAdv : existing.scoreAdv,
     statut: data.statut ?? existing.statut,
+    niveau: data.niveau !== undefined ? data.niveau || null : existing.niveau,
   };
 
   const stmt = db.prepare(`
     UPDATE matchs
-    SET date_match = ?, heure_match = ?, adversaire = ?, lieu = ?, score_dogz = ?, score_adv = ?, statut = ?
+    SET date_match = ?, heure_match = ?, adversaire = ?, lieu = ?, score_dogz = ?, score_adv = ?, statut = ?, niveau = ?
     WHERE id = ?
   `);
 
@@ -100,6 +105,7 @@ function updateMatch(id, data) {
     updated.scoreDogz,
     updated.scoreAdv,
     updated.statut,
+    updated.niveau,
     id
   );
 
